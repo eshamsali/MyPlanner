@@ -1,0 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light" data-accent="purple">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}My Planner{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
+</head>
+<body style="overflow:auto; height:auto; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;">
+  <div style="width:100%; max-width:400px;">
+    <div style="display:flex; align-items:center; gap:10px; justify-content:center; margin-bottom:26px;">
+      <div class="sidebar-logo">M</div>
+      <span class="sidebar-brand-name">My Planner</span>
+    </div>
+    <div class="card" style="padding:28px;">
+      {% block auth_content %}{% endblock %}
+    </div>
+  </div>
+</body>
+</html>

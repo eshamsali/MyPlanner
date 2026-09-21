@@ -1,0 +1,174 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ lang }}" dir="{% if is_rtl %}rtl{% else %}ltr{% endif %}"
+      data-theme="{{ profile.theme|default:'light' }}" data-accent="{{ profile.accent_color|default:'purple' }}" data-font-size="{{ profile.font_size|default:'medium' }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ T.app_name }}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body data-autosave-url="{% url 'journal:autosave' %}" data-preference-url="{% url 'accounts:set_preference' %}" data-notifications-url="{% url 'core:notifications_data' %}" data-no-notifications-text="{{ T.no_notifications }}" data-vapid-public-key="{{ VAPID_PUBLIC_KEY }}">
+
+<div class="app-shell">
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">M</div>
+      <span class="sidebar-brand-name">{{ T.app_name }}</span>
+    </div>
+
+    <div class="nav-section-label">{{ T.nav_main }}</div>
+    <nav class="nav-group">
+      {% url 'core:dashboard' as u_dash %}
+      {% url 'core:calendar' as u_cal %}
+      {% url 'schedule:list' as u_schedule %}
+      {% url 'tasks:list' as u_tasks %}
+      {% url 'habits:list' as u_habits %}
+      {% url 'goals:list' as u_goals %}
+      {% url 'journal:entry' as u_journal %}
+      {% url 'notes:list' as u_notes %}
+
+      <a href="{{ u_dash }}" class="nav-item {% if request.path == u_dash %}active{% endif %}">
+        <i data-lucide="layout-grid"></i><span class="nav-label">{{ T.nav_dashboard }}</span>
+      </a>
+      <a href="{{ u_cal }}" class="nav-item {% if request.path == u_cal %}active{% endif %}">
+        <i data-lucide="calendar"></i><span class="nav-label">{{ T.nav_calendar }}</span>
+      </a>
+      <a href="{{ u_schedule }}" class="nav-item {% if request.path == u_schedule %}active{% endif %}">
+        <i data-lucide="calendar-clock"></i><span class="nav-label">{{ T.nav_schedule }}</span>
+      </a>
+      <a href="{{ u_tasks }}" class="nav-item {% if request.path == u_tasks %}active{% endif %}">
+        <i data-lucide="check-square"></i><span class="nav-label">{{ T.nav_tasks }}</span>
+      </a>
+      <a href="{{ u_habits }}" class="nav-item {% if request.path == u_habits %}active{% endif %}">
+        <i data-lucide="repeat"></i><span class="nav-label">{{ T.nav_habits }}</span>
+      </a>
+      <a href="{{ u_goals }}" class="nav-item {% if request.path == u_goals %}active{% endif %}">
+        <i data-lucide="target"></i><span class="nav-label">{{ T.nav_goals }}</span>
+      </a>
+      <a href="{{ u_journal }}" class="nav-item {% if request.path == u_journal %}active{% endif %}">
+        <i data-lucide="book-open"></i><span class="nav-label">{{ T.nav_journal }}</span>
+      </a>
+      <a href="{{ u_notes }}" class="nav-item {% if request.path == u_notes %}active{% endif %}">
+        <i data-lucide="sticky-note"></i><span class="nav-label">{{ T.nav_notes }}</span>
+      </a>
+    </nav>
+
+    <div class="nav-section-label">{{ T.nav_planning }}</div>
+    <nav class="nav-group">
+      <a href="{{ u_tasks }}?tab=today" class="nav-item">
+        <i data-lucide="sun"></i><span class="nav-label">{{ T.nav_today }}</span>
+      </a>
+      <a href="{{ u_tasks }}?tab=upcoming" class="nav-item">
+        <i data-lucide="clock"></i><span class="nav-label">{{ T.nav_upcoming }}</span>
+      </a>
+      <a href="{{ u_tasks }}?tab=completed" class="nav-item">
+        <i data-lucide="check"></i><span class="nav-label">{{ T.nav_completed }}</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-spacer"></div>
+
+    <div class="sidebar-bottom">
+      {% url 'accounts:settings' as u_settings %}
+      {% url 'accounts:profile' as u_profile %}
+      <a href="{{ u_settings }}" class="nav-item {% if request.path == u_settings %}active{% endif %}">
+        <i data-lucide="settings"></i><span class="nav-label">{{ T.nav_settings }}</span>
+      </a>
+      <a href="{{ u_profile }}" class="nav-item {% if request.path == u_profile %}active{% endif %}">
+        <i data-lucide="user"></i><span class="nav-label">{{ T.nav_profile }}</span>
+      </a>
+      <button type="button" class="nav-bottom-btn" id="theme-toggle" data-current-theme="{{ profile.theme|default:'light' }}">
+        <span data-theme-icon>{% if profile.theme == 'dark' %}☀{% else %}☾{% endif %}</span><span class="nav-label">{{ T.toggle_theme }}</span>
+      </button>
+      <button type="button" class="nav-bottom-btn" id="lang-toggle" data-current-lang="{{ lang }}">
+        <span data-lang-icon style="font-weight:700; font-size:12px;">{% if lang == 'ar' %}EN{% else %}ع{% endif %}</span><span class="nav-label">{% if lang == 'ar' %}English{% else %}العربية{% endif %}</span>
+      </button>
+      <button type="button" class="nav-bottom-btn" id="collapse-toggle">
+        <i data-lucide="menu"></i><span class="nav-label">{{ T.collapse }}</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main-col">
+    <header class="topbar">
+      <div class="topbar-title">
+        <button type="button" class="icon-btn mobile-menu-btn" id="mobile-menu-btn" style="display:none;"><i data-lucide="menu"></i></button>
+        {% block page_title %}{% endblock %}
+      </div>
+      <div class="topbar-right">
+        <form class="search-pill" action="{% url 'notes:list' %}" method="get">
+          <i data-lucide="search" style="width:15px;height:15px;"></i>
+          <input type="text" name="q" placeholder="{{ T.search_placeholder }}">
+        </form>
+
+        <div style="position:relative;">
+          <button class="icon-btn" type="button" id="notif-btn"><i data-lucide="bell"></i><span class="dot" id="notif-dot"></span></button>
+          <div class="quick-add-menu" id="notif-menu" style="display:none; width:270px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 8px 10px;">
+              <span style="font-size:12.5px; font-weight:700;">{{ T.notifications }}</span>
+              <button type="button" id="notif-mark-read" style="background:none; border:none; color:var(--accent); font-size:11.5px; font-weight:600; padding:0;">{{ T.mark_all_read }}</button>
+            </div>
+            <div id="notif-list" style="display:flex; flex-direction:column; gap:2px;"></div>
+          </div>
+        </div>
+
+        <div style="position:relative;">
+          <button class="btn-accent" id="quick-add-btn" type="button">
+            <i data-lucide="plus" style="width:15px;height:15px;"></i> {{ T.quick_add }}
+          </button>
+          <div class="quick-add-menu" id="quick-add-menu" style="display:none;">
+            <a href="{{ u_tasks }}?new=1">{{ T.new_task }}</a>
+            <a href="{{ u_habits }}?new=1">{{ T.new_habit }}</a>
+            <a href="{{ u_goals }}?new=1">{{ T.new_goal }}</a>
+            <a href="{{ u_journal }}">{{ T.journal_entry }}</a>
+            <a href="{% url 'notes:new' %}">{{ T.new_note }}</a>
+          </div>
+        </div>
+        <a href="{{ u_profile }}" class="avatar-chip">
+          {% if profile.avatar %}<img src="{{ profile.avatar.url }}" alt="">{% else %}{{ profile.initials|default:"?" }}{% endif %}
+        </a>
+      </div>
+    </header>
+
+    <main class="page-content">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="card" style="margin-bottom:16px; border-color: var(--accent);">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <button type="button" class="fab-add" id="fab-add-btn"><i data-lucide="plus"></i></button>
+
+  <nav class="bottom-nav" id="bottom-nav">
+    <a href="{{ u_dash }}" class="bottom-nav-item {% if request.path == u_dash %}active{% endif %}">
+      <i data-lucide="layout-grid"></i><span>{{ T.nav_dashboard }}</span>
+    </a>
+    <a href="{{ u_cal }}" class="bottom-nav-item {% if request.path == u_cal %}active{% endif %}">
+      <i data-lucide="calendar"></i><span>{{ T.nav_calendar }}</span>
+    </a>
+    <a href="{{ u_tasks }}" class="bottom-nav-item {% if request.path == u_tasks %}active{% endif %}">
+      <i data-lucide="check-square"></i><span>{{ T.nav_tasks }}</span>
+    </a>
+    <a href="{{ u_habits }}" class="bottom-nav-item {% if request.path == u_habits %}active{% endif %}">
+      <i data-lucide="repeat"></i><span>{{ T.nav_habits }}</span>
+    </a>
+    <button type="button" class="bottom-nav-item" id="bottom-nav-more">
+      <i data-lucide="more-horizontal"></i><span>{% if lang == 'ar' %}المزيد{% else %}More{% endif %}</span>
+    </button>
+  </nav>
+</div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="{% static 'core/js/app.js' %}"></script>
+<script>if (window.lucide) lucide.createIcons();</script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

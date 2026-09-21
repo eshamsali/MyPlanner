@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load planner_extras %}
+{% block title %}{{ T.calendar }} · {{ T.app_name }}{% endblock %}
+{% block page_title %}{{ T.calendar }}{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+  <div style="display:flex; align-items:center; gap:14px;">
+    <a href="?year={{ prev_year }}&month={{ prev_month }}" class="icon-btn"><i data-lucide="chevron-left"></i></a>
+    <span style="font-size:17px; font-weight:600;">{{ month_label }}</span>
+    <a href="?year={{ next_year }}&month={{ next_month }}" class="icon-btn"><i data-lucide="chevron-right"></i></a>
+  </div>
+  <a href="{% url 'core:calendar' %}" class="btn-secondary">{{ T.today }}</a>
+</div>
+
+<div class="card" style="padding:18px; margin-bottom:20px;">
+  <div class="cal-grid" style="margin-bottom:8px;">
+    <div class="cal-weekday">{{ T.wd_mon }}</div>
+    <div class="cal-weekday">{{ T.wd_tue }}</div>
+    <div class="cal-weekday">{{ T.wd_wed }}</div>
+    <div class="cal-weekday">{{ T.wd_thu }}</div>
+    <div class="cal-weekday">{{ T.wd_fri }}</div>
+    <div class="cal-weekday">{{ T.wd_sat }}</div>
+    <div class="cal-weekday">{{ T.wd_sun }}</div>
+  </div>
+
+  {% for week in weeks %}
+  <div class="cal-grid" style="margin-bottom:6px;">
+    {% for day in week %}
+      {% with day_tasks=tasks_by_day|get_item:day day_appts=appointments_by_day|get_item:day %}
+      <a href="?year={{ year }}&month={{ month }}&selected={{ day|date:'Y-m-d' }}"
+         class="cal-cell {% if day == today %}today{% endif %}"
+         style="display:block; {% if day.month != month %}opacity:0.35;{% endif %} {% if day == selected_date %}outline:2px solid var(--accent);{% endif %}">
+        <div class="cal-daynum">{{ day.day }}</div>
+        {% if day_tasks %}
+          <div style="margin-top:8px; display:flex; gap:3px; flex-wrap:wrap; align-items:center;">
+            {% for t in day_tasks|slice:":3" %}
+              <div class="cal-dot" style="background: {% if t.priority == 'high' %}var(--error){% elif t.priority == 'medium' %}var(--warning){% else %}var(--success){% endif %};"></div>
+            {% endfor %}
+            <span style="font-size:10px;" class="muted">{{ day_tasks|length }}</span>
+          </div>
+        {% endif %}
+        {% if day_appts %}
+          <div style="margin-top:4px; display:flex; gap:3px; flex-wrap:wrap; align-items:center;">
+            {% for a in day_appts|slice:":3" %}
+              <div class="cal-dot cal-dot-square" style="background: var(--accent);"></div>
+            {% endfor %}
+            {% if day_appts|length > 1 %}<span style="font-size:10px;" class="muted">{{ day_appts|length }}</span>{% endif %}
+          </div>
+        {% endif %}
+      </a>
+      {% endwith %}
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card">
+  <div class="section-title-row">
+    <h3 class="section-title">{{ T.tasks_on }} {{ selected_date|date:"M j" }}</h3>
+    <a href="{% url 'tasks:list' %}" class="section-action">{{ T.view_all }}</a>
+  </div>
+  {% if selected_tasks %}
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      {% for task in selected_tasks %}
+      <div style="display:flex; align-items:center; gap:12px;" data-row>
+        <button class="checkbox-btn {% if task.is_completed %}checked{% endif %}" data-toggle-url="{% url 'tasks:toggle' task.pk %}">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 3.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <span style="flex:1; font-size:13.5px;" class="{% if task.is_completed %}text-strike{% endif %}" data-title>{{ task.title }}</span>
+        <span class="muted" style="font-size:12px;">{{ task.start_time|time:"g:i A"|default:"—" }}</span>
+        <span class="badge badge-{{ task.priority }}">{{ task.get_priority_display }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted" style="font-size:13px;">{{ T.no_tasks_selected_day }}</p>
+  {% endif %}
+</div>
+
+<div class="card" style="margin-top:16px;">
+  <div class="section-title-row">
+    <h3 class="section-title">{{ T.fixed_appointments }}</h3>
+    <a href="{% url 'schedule:list' %}" class="section-action">{{ T.view_all }}</a>
+  </div>
+  {% if selected_appointments %}
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      {% for appt in selected_appointments %}
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="width:8px; height:8px; border-radius:2px; background:var(--accent); flex-shrink:0;"></div>
+        <span style="flex:1; font-size:13.5px;">{{ appt.title }}{% if appt.location %} · <span class="muted">{{ appt.location }}</span>{% endif %}</span>
+        <span class="muted" style="font-size:12px;">{{ appt.start_time|time:"g:i A" }}{% if appt.end_time %} – {{ appt.end_time|time:"g:i A" }}{% endif %}</span>
+        <span class="badge badge-cat">{{ appt.get_category_display }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted" style="font-size:13px;">{{ T.no_appointments_day }}</p>
+  {% endif %}
+</div>
+{% endblock %}

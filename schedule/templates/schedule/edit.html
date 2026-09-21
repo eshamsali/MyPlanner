@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ appointment.title }} · {{ T.app_name }}{% endblock %}
+{% block page_title %}{{ T.nav_schedule }}{% endblock %}
+
+{% block content %}
+<a href="{% url 'schedule:list' %}" class="muted" style="font-size:13px; display:inline-block; margin-bottom:16px;">← {{ T.back_to_schedule }}</a>
+
+<div class="card" style="max-width:520px;">
+  <h3 class="modal-title">{{ T.edit }} — {{ appointment.title }}</h3>
+  <form method="post">
+    {% csrf_token %}
+    <div class="field-row">
+      <label class="field-label">{{ T.name }}</label>
+      {{ form.title }}
+    </div>
+    <div class="field-row-2">
+      <div><label class="field-label">{{ T.weekday_label }}</label>{{ form.weekday }}</div>
+      <div><label class="field-label">{{ T.categories_label }}</label>{{ form.category }}</div>
+    </div>
+    <div class="field-row-2">
+      <div><label class="field-label">{{ T.start_time }}</label>{{ form.start_time }}</div>
+      <div><label class="field-label">{{ T.end_time }}</label>{{ form.end_time }}</div>
+    </div>
+    <div class="field-row">
+      <label class="field-label">{{ T.location }}</label>
+      {{ form.location }}
+    </div>
+    <div class="field-row">
+      <label class="field-label">{{ T.notes }}</label>
+      {{ form.notes }}
+    </div>
+    <div class="modal-actions">
+      <a href="{% url 'schedule:list' %}" class="btn-secondary">{{ T.cancel }}</a>
+      <button type="submit" class="btn-accent">{{ T.save_changes }}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

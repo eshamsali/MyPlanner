@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ T.delete }} · {{ T.app_name }}{% endblock %}
+{% block page_title %}{{ T.notes }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:420px;">
+  <h3 class="modal-title">{{ T.delete }} "{{ note.title|default:"Untitled note" }}"?</h3>
+  <p class="muted" style="font-size:13px;">This can't be undone.</p>
+  <form method="post" style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px;">
+    {% csrf_token %}
+    <a href="{% url 'notes:list' %}" class="btn-secondary">{{ T.cancel }}</a>
+    <button type="submit" class="btn-secondary btn-danger">{{ T.delete }}</button>
+  </form>
+</div>
+{% endblock %}

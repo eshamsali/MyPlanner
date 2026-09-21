@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ T.journal }} · {{ T.app_name }}{% endblock %}
+{% block page_title %}{{ T.journal }}{% endblock %}
+
+{% block content %}
+<div class="journal-page">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+    <span style="font-family:var(--font-voice); font-size:20px;">{{ date|date:"l, F j" }}</span>
+    <a href="{% url 'journal:insights' %}" class="section-action">{{ T.view_insights_report }}</a>
+  </div>
+
+  <input type="hidden" id="journal-date" value="{{ date|date:'Y-m-d' }}">
+
+  <div class="card" style="margin-bottom:18px;">
+    <div style="text-align:center; margin-bottom:6px; font-size:13.5px;">{{ T.how_feeling }}</div>
+    <div class="mood-row">
+      {% for value, emoji in mood_choices %}
+        <button type="button" class="mood-option {% if entry.mood == value %}selected{% endif %}" data-mood-option="{{ value }}">{{ emoji }}</button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="field-row">
+      <label class="field-label">{{ T.highlights }}</label>
+      <textarea class="journal-field" data-journal-field="highlights">{{ entry.highlights }}</textarea>
+    </div>
+    <div class="field-row">
+      <label class="field-label">{{ T.gratitude }}</label>
+      <textarea class="journal-field" data-journal-field="gratitude">{{ entry.gratitude }}</textarea>
+    </div>
+    <div class="field-row">
+      <label class="field-label">{{ T.reflection }}</label>
+      <textarea class="journal-field" data-journal-field="reflection">{{ entry.reflection }}</textarea>
+    </div>
+    <div class="field-row">
+      <label class="field-label">{{ T.tomorrow }}</label>
+      <textarea class="journal-field" data-journal-field="tomorrow">{{ entry.tomorrow }}</textarea>
+    </div>
+    <div class="autosave-note" id="autosave-status">{{ T.saved_just_now }}</div>
+  </div>
+</div>
+{% endblock %}

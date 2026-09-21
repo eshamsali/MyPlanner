@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load planner_extras %}
+{% block title %}{{ T.nav_schedule }} · {{ T.app_name }}{% endblock %}
+{% block page_title %}{{ T.nav_schedule }}{% endblock %}
+
+{% block content %}
+<div class="list-toolbar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+  <p class="muted" style="font-size:13px; margin:0;">{{ T.schedule_hint }}</p>
+  <button class="btn-accent" data-open-modal="new-appointment-modal" type="button" style="white-space:nowrap;">
+    <i data-lucide="plus" style="width:15px;height:15px;"></i> {{ T.add_appointment }}
+  </button>
+</div>
+
+{% if total_count %}
+<div class="schedule-week-grid">
+  {% for day_num, appts in by_day.items %}
+  <div class="card card-tight" style="min-height:160px;">
+    <div style="font-size:12.5px; font-weight:700; margin-bottom:10px; color:var(--accent-deep);">
+      {{ T.weekday_names|get_item:day_num }}
+    </div>
+    {% if appts %}
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        {% for appt in appts %}
+        <div style="border-top:1px solid var(--border); padding-top:8px;">
+          <div style="font-size:12.5px; font-weight:600;">{{ appt.title }}</div>
+          <div class="muted" style="font-size:11px; margin-top:2px;">
+            {{ appt.start_time|time:"g:i A" }}{% if appt.end_time %} – {{ appt.end_time|time:"g:i A" }}{% endif %}
+          </div>
+          {% if appt.location %}<div class="muted" style="font-size:11px;">📍 {{ appt.location }}</div>{% endif %}
+          <span class="badge badge-cat" style="margin-top:6px;">{{ appt.get_category_display }}</span>
+          <div style="display:flex; gap:8px; margin-top:8px;">
+            <a href="{% url 'schedule:edit' appt.pk %}" style="font-size:11px; color:var(--accent); font-weight:600;">{{ T.edit }}</a>
+            <form method="post" action="{% url 'schedule:delete' appt.pk %}" onsubmit="return confirm('{{ T.delete }}?');" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" style="border:none; background:none; padding:0; font-size:11px; color:var(--error); font-weight:600;">{{ T.delete }}</button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted" style="font-size:11.5px;">—</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">
+  <div class="empty-state">
+    <div class="emoji">🗓️</div>
+    <h4>{{ T.no_appointments_title }}</h4>
+    <p>{{ T.no_appointments_body }}</p>
+    <button class="btn-accent" data-open-modal="new-appointment-modal" type="button">{{ T.add_appointment }}</button>
+  </div>
+</div>
+{% endif %}
+
+<div class="modal-backdrop" id="new-appointment-modal" style="display:none;">
+  <div class="modal-box">
+    <h3 class="modal-title">{{ T.add_appointment }}</h3>
+    <form method="post">
+      {% csrf_token %}
+      <div class="field-row">
+        <label class="field-label">{{ T.name }}</label>
+        {{ form.title }}
+      </div>
+      <div class="field-row-2">
+        <div><label class="field-label">{{ T.weekday_label }}</label>{{ form.weekday }}</div>
+        <div><label class="field-label">{{ T.categories_label }}</label>{{ form.category }}</div>
+      </div>
+      <div class="field-row-2">
+        <div><label class="field-label">{{ T.start_time }}</label>{{ form.start_time }}</div>
+        <div><label class="field-label">{{ T.end_time }}</label>{{ form.end_time }}</div>
+      </div>
+      <div class="field-row">
+        <label class="field-label">{{ T.location }}</label>
+        {{ form.location }}
+      </div>
+      <div class="field-row">
+        <label class="field-label">{{ T.notes }}</label>
+        {{ form.notes }}
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" data-close-modal>{{ T.cancel }}</button>
+        <button type="submit" class="btn-accent">{{ T.add_appointment }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

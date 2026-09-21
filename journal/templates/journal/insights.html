@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load planner_extras %}
+{% block title %}{{ T.journal_insights }} · {{ T.app_name }}{% endblock %}
+{% block page_title %}{{ T.journal_insights }}{% endblock %}
+
+{% block content %}
+<div style="max-width:840px; margin:0 auto;">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:18px;">
+    <a href="{% url 'journal:entry' %}" class="muted" style="font-size:13px;">← {{ T.back_to_journal }}</a>
+    <div class="tabs">
+      <a href="?days=30" class="tab {% if days == 30 %}active{% endif %}">{{ T.last_30_days }}</a>
+      <a href="?days=90" class="tab {% if days == 90 %}active{% endif %}">{{ T.last_90_days }}</a>
+    </div>
+  </div>
+
+  <div class="grid grid-3" style="margin-bottom:18px;">
+    <div class="card card-tight">
+      <div class="muted" style="font-size:11.5px; margin-bottom:6px;">{{ T.avg_mood }}</div>
+      <div style="font-size:22px; font-weight:600;">{{ insights.avg_mood|default:"—" }} / 5</div>
+    </div>
+    <div class="card card-tight">
+      <div class="muted" style="font-size:11.5px; margin-bottom:6px;">{{ T.mood_trend }}</div>
+      <div style="font-size:15px; font-weight:600;">
+        {% if insights.trend == "improving" %}📈 {{ T.trend_improving }}
+        {% elif insights.trend == "declining" %}📉 {{ T.trend_declining }}
+        {% else %}➡️ {{ T.trend_stable }}{% endif %}
+      </div>
+    </div>
+    <div class="card card-tight">
+      <div class="muted" style="font-size:11.5px; margin-bottom:6px;">{{ T.entries_logged }}</div>
+      <div style="font-size:22px; font-weight:600;">{{ insights.mood_count }}</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:18px;">
+    <div class="section-title-row"><h3 class="section-title">{{ T.mood_over_time }}</h3></div>
+    {% if insights.mood_series %}
+      <div style="display:flex; align-items:flex-end; gap:3px; height:110px; overflow-x:auto; padding-bottom:4px;">
+        {% for point in insights.mood_series %}
+          <div title="{{ point.date }} — {{ point.score }}/5"
+               style="flex-shrink:0; width:9px; height:{{ point.score|mul:20 }}px; border-radius:3px 3px 0 0;
+               background: {% if point.score >= 4 %}var(--success){% elif point.score == 3 %}var(--warning){% else %}var(--error){% endif %};"></div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted" style="font-size:13px;">{{ T.no_mood_data }}</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="section-title-row"><h3 class="section-title">{{ T.recommendations }}</h3></div>
+    <div style="display:flex; flex-direction:column; gap:14px;">
+      {% for rec in insights.recommendations %}
+      <div style="display:flex; gap:12px; align-items:flex-start;">
+        <div style="width:8px; height:8px; border-radius:4px; background:var(--accent); margin-top:6px; flex-shrink:0;"></div>
+        <p style="font-size:13.5px; margin:0;">{{ rec }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ note.title|default:"New note" }} · {{ T.app_name }}{% endblock %}
+{% block page_title %}{{ T.notes }}{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+  <a href="{% url 'notes:list' %}" class="muted" style="font-size:13px;">← {{ T.all_notes }}</a>
+  {% if note %}
+  <a href="{% url 'notes:delete' note.pk %}" class="btn-secondary btn-danger" style="font-size:12.5px;">{{ T.delete }}</a>
+  {% endif %}
+</div>
+
+<form method="post" class="card">
+  {% csrf_token %}
+  <div class="field-row">{{ form.title }}</div>
+  <div class="field-row">
+    <label class="field-label">Folder</label>
+    {{ form.folder }}
+  </div>
+  <div class="field-row">{{ form.content }}</div>
+  <button type="submit" class="btn-accent">{{ T.save_changes }}</button>
+</form>
+{% endblock %}

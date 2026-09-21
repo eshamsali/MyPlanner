@@ -1,0 +1,41 @@
+{% extends "auth_base.html" %}
+{% block title %}Sign up · My Planner{% endblock %}
+
+{% block auth_content %}
+<h2 style="margin:0 0 4px; font-size:19px;">Create your planner</h2>
+<p class="muted" style="font-size:13px; margin:0 0 22px;">A calm, organized space for your days.</p>
+
+<form method="post">
+  {% csrf_token %}
+  <div class="field-row">
+    <label class="field-label">Name</label>
+    {{ form.first_name }}
+  </div>
+  <div class="field-row">
+    <label class="field-label">Email</label>
+    {{ form.email }}
+  </div>
+  <div class="field-row">
+    <label class="field-label">Username</label>
+    {{ form.username }}
+  </div>
+  <div class="field-row">
+    <label class="field-label">Password</label>
+    {{ form.password1 }}
+  </div>
+  <div class="field-row">
+    <label class="field-label">Confirm password</label>
+    {{ form.password2 }}
+  </div>
+  {% for field in form %}
+    {% for error in field.errors %}
+      <div style="color:var(--error); font-size:12px; margin:-8px 0 12px;">{{ error }}</div>
+    {% endfor %}
+  {% endfor %}
+  <button type="submit" class="btn-accent" style="width:100%; justify-content:center;">Sign up</button>
+</form>
+
+<p class="muted" style="font-size:13px; text-align:center; margin-top:18px;">
+  Already have an account? <a href="{% url 'accounts:login' %}" style="color:var(--accent); font-weight:600;">Log in</a>
+</p>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ T.notes }} · {{ T.app_name }}{% endblock %}
+{% block page_title %}{{ T.notes }}{% endblock %}
+
+{% block content %}
+<div class="notes-layout">
+  <div class="card card-tight" style="height:fit-content;">
+    <a href="{% url 'notes:list' %}" class="nav-item {% if not active_folder %}active{% endif %}">{{ T.all_notes }}</a>
+    {% for folder in folders %}
+      <a href="?folder={{ folder.pk }}" class="nav-item {% if active_folder == folder.pk|stringformat:'s' %}active{% endif %}">{{ folder.name }}</a>
+    {% endfor %}
+  </div>
+
+  <div>
+    <div style="display:flex; justify-content:flex-end; margin-bottom:14px;">
+      <a href="{% url 'notes:new' %}" class="btn-accent"><i data-lucide="plus" style="width:15px;height:15px;"></i> {{ T.new_note }}</a>
+    </div>
+    {% if notes %}
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        {% for note in notes %}
+        <a href="{% url 'notes:edit' note.pk %}" class="card" style="display:block; text-decoration:none;">
+          <div style="font-size:13.5px; font-weight:600; margin-bottom:4px;">{{ note.title|default:"Untitled note" }}</div>
+          <div class="muted" style="font-size:12px;">{{ note.preview }}</div>
+        </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="card">
+        <div class="empty-state">
+          <div class="emoji">📝</div>
+          <h4>{{ T.no_notes_title }}</h4>
+          <p>{{ T.no_notes_body }}</p>
+          <a href="{% url 'notes:new' %}" class="btn-accent">{{ T.new_note }}</a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

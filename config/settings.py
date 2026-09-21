@@ -1,0 +1,141 @@
+"""
+Django settings for the My Planner project.
+"""
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
+
+# ---------------------------------------------------------------------------
+# Core / security
+# ---------------------------------------------------------------------------
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-secret-key-change-me")
+DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+
+# ---------------------------------------------------------------------------
+# Applications
+# ---------------------------------------------------------------------------
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.humanize",
+
+    # local apps
+    "accounts",
+    "core",
+    "tasks",
+    "habits",
+    "goals",
+    "journal",
+    "notes",
+    "schedule",
+]
+
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+ROOT_URLCONF = "config.urls"
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+                "core.context_processors.planner_context",
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = "config.wsgi.application"
+
+# ---------------------------------------------------------------------------
+# Database — MySQL
+# ---------------------------------------------------------------------------
+# charset MUST be utf8mb4 — the app stores emoji (journal moods, goal icons),
+# and MySQL's plain "utf8" charset is actually a 3-byte-max legacy encoding
+# that cannot hold most emoji. Make sure the database itself was also
+# CREATEd with utf8mb4 (see the SQL in the setup notes).
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.environ.get("MYSQL_DB", "planner_db"),
+        "USER": os.environ.get("MYSQL_USER", "planner_user"),
+        "PASSWORD": os.environ.get("MYSQL_PASSWORD", "planner_pass"),
+        "HOST": os.environ.get("MYSQL_HOST", "localhost"),
+        "PORT": os.environ.get("MYSQL_PORT", "3306"),
+        "OPTIONS": {
+            "charset": "utf8mb4",
+        },
+    }
+}
+
+# ---------------------------------------------------------------------------
+# Auth
+# ---------------------------------------------------------------------------
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
+
+LOGIN_URL = "accounts:login"
+LOGIN_REDIRECT_URL = "core:dashboard"
+LOGOUT_REDIRECT_URL = "accounts:login"
+
+# ---------------------------------------------------------------------------
+# Internationalization
+# ---------------------------------------------------------------------------
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
+USE_I18N = True
+USE_TZ = True
+
+# ---------------------------------------------------------------------------
+# Static & media files
+# ---------------------------------------------------------------------------
+STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "core" / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ---------------------------------------------------------------------------
+# Web Push (VAPID) — real OS-level push notifications.
+#
+# One-time setup:
+#   pip install py-vapid pywebpush
+#   python -m py_vapid --gen
+# That creates private_key.pem + public_key.pem in your current directory
+# and prints an "Application Server Key" (base64url) — that printed value is
+# VAPID_PUBLIC_KEY below. Move private_key.pem next to manage.py (or point
+# VAPID_PRIVATE_KEY_PATH at wherever you keep it) and keep it out of git.
+# ---------------------------------------------------------------------------
+VAPID_PUBLIC_KEY = os.environ.get("VAPID_PUBLIC_KEY", "")
+VAPID_PRIVATE_KEY_PATH = os.environ.get("VAPID_PRIVATE_KEY_PATH", str(BASE_DIR / "private_key.pem"))
+VAPID_ADMIN_EMAIL = os.environ.get("VAPID_ADMIN_EMAIL", "mailto:you@example.com")

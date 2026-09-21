@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}{{ goal.name }} · {{ T.app_name }}{% endblock %}
+{% block page_title %}{{ T.goals }}{% endblock %}
+
+{% block content %}
+<a href="{% url 'goals:list' %}" class="muted" style="font-size:13px; display:inline-block; margin-bottom:16px;">← {{ T.back_to_goals }}</a>
+
+<div class="card" style="margin-bottom:18px;">
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px;">
+    <div>
+      <div style="font-size:30px; margin-bottom:8px;">{{ goal.icon }}</div>
+      <h2 style="margin:0 0 6px; font-size:19px;">{{ goal.name }}</h2>
+      <p class="muted" style="font-size:13px; margin:0;">{{ goal.description }}</p>
+    </div>
+    <button type="button" class="achieve-btn {% if goal.is_achieved %}achieved-active{% endif %}"
+            data-achieve-url="{% url 'goals:toggle_achieved' goal.pk %}"
+            data-label-on="{{ T.achieved }}" data-label-off="{{ T.mark_achieved }}"
+            style="white-space:nowrap;">
+      {% if goal.is_achieved %}{{ T.achieved }}{% else %}{{ T.mark_achieved }}{% endif %}
+    </button>
+  </div>
+  <div style="margin-top:18px;">
+    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+      <span class="muted" style="font-size:12px;">{{ T.milestones_remaining }}: {{ goal.milestones_remaining }}</span>
+      <span id="goal-progress-pct" style="font-size:12px; font-weight:600;">{{ goal.progress_pct }}%</span>
+    </div>
+    <div class="progress-track"><div id="goal-progress-fill" class="progress-fill" style="width:{{ goal.progress_pct }}%;"></div></div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="section-title-row"><h3 class="section-title">{{ T.milestones }}</h3></div>
+    {% if goal.milestones.all %}
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        {% for m in goal.milestones.all %}
+        <div style="display:flex; align-items:center; gap:12px;">
+          <button class="checkbox-btn {% if m.is_completed %}checked{% endif %}" data-milestone-url="{% url 'goals:toggle_milestone' m.pk %}">
+            <svg viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 3.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <span style="font-size:13.5px; {% if m.is_completed %}text-decoration:line-through; color:var(--muted);{% endif %}">{{ m.title }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted" style="font-size:13px;">{{ T.no_milestones }}</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="section-title-row"><h3 class="section-title">{{ T.related_tasks }}</h3></div>
+    {% if related_tasks %}
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        {% for task in related_tasks %}
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span class="badge badge-{{ task.priority }}">{{ task.get_priority_display }}</span>
+          <span style="flex:1; font-size:13px; {% if task.is_completed %}text-decoration:line-through; color:var(--muted);{% endif %}">{{ task.title }}</span>
+          <span class="muted" style="font-size:11.5px;">{{ task.due_date|date:"M j" }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted" style="font-size:13px;">{{ T.no_related_tasks }}</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

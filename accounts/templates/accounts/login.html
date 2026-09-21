@@ -1,0 +1,30 @@
+{% extends "auth_base.html" %}
+{% block title %}Log in · My Planner{% endblock %}
+
+{% block auth_content %}
+<h2 style="margin:0 0 4px; font-size:19px;">Welcome back</h2>
+<p class="muted" style="font-size:13px; margin:0 0 22px;">Log in to keep your day organized.</p>
+
+{% if form.errors %}
+  <div class="card" style="border-color:var(--error); background:var(--error-soft); margin-bottom:16px; padding:12px 14px;">
+    <span style="font-size:13px; color:var(--error);">Your username or password was incorrect.</span>
+  </div>
+{% endif %}
+
+<form method="post">
+  {% csrf_token %}
+  <div class="field-row">
+    <label class="field-label">Username</label>
+    <input type="text" name="username" class="field" required autofocus>
+  </div>
+  <div class="field-row">
+    <label class="field-label">Password</label>
+    <input type="password" name="password" class="field" required>
+  </div>
+  <button type="submit" class="btn-accent" style="width:100%; justify-content:center;">Log in</button>
+</form>
+
+<p class="muted" style="font-size:13px; text-align:center; margin-top:18px;">
+  Don't have an account? <a href="{% url 'accounts:signup' %}" style="color:var(--accent); font-weight:600;">Sign up</a>
+</p>
+{% endblock %}

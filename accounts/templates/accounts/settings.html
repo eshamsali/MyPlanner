@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}{{ T.settings }} · {{ T.app_name }}{% endblock %}
+{% block page_title %}{{ T.settings }}{% endblock %}
+
+{% block content %}
+<div style="max-width:640px; display:flex; flex-direction:column; gap:18px;">
+
+  <div class="card">
+    <div class="section-title-row"><h3 class="section-title">{{ T.appearance }}</h3></div>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="section" value="appearance">
+      <div class="field-row">
+        <label class="field-label">{{ T.theme }}</label>
+        {{ appearance_form.theme }}
+      </div>
+      <div class="field-row">
+        <label class="field-label">{{ T.accent_color }}</label>
+        {{ appearance_form.accent_color }}
+      </div>
+      <div class="field-row">
+        <label class="field-label">{{ T.font_size }}</label>
+        {{ appearance_form.font_size }}
+      </div>
+      <div class="field-row">
+        <label class="field-label">{{ T.language }}</label>
+        {{ appearance_form.language }}
+      </div>
+      <button type="submit" class="btn-accent">{{ T.save }}</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="section-title-row"><h3 class="section-title">{{ T.planner_settings }}</h3></div>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="section" value="planner">
+      <div class="field-row">
+        <label class="field-label">{{ T.start_of_week }}</label>
+        {{ planner_form.week_start }}
+      </div>
+      <div class="field-row">
+        <label class="field-label">{{ T.time_format }}</label>
+        <select name="time_format_24h" class="field">
+          <option value="False" {% if not planner_form.instance.time_format_24h %}selected{% endif %}>12-hour</option>
+          <option value="True" {% if planner_form.instance.time_format_24h %}selected{% endif %}>24-hour</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-accent">{{ T.save }}</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="section-title-row"><h3 class="section-title">{{ T.notif_settings }}</h3></div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border);">
+      <div>
+        <div style="font-size:13.5px; font-weight:600;">{{ T.push_notifications }}</div>
+        <div class="muted" style="font-size:12px; margin-top:2px;">{{ T.push_notifications_hint }}</div>
+      </div>
+      <button type="button" class="achieve-btn" id="enable-push-btn"
+              data-label-on="{{ T.push_disable }}" data-label-off="{{ T.push_enable }}">
+        {{ T.push_enable }}
+      </button>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="section" value="notifications">
+      {% for field in notif_form %}
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-top:1px solid var(--border);">
+        <label style="font-size:13.5px;" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+      </div>
+      {% endfor %}
+      <button type="submit" class="btn-accent" style="margin-top:10px;">{{ T.save }}</button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

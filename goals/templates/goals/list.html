@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}{{ T.goals }} · {{ T.app_name }}{% endblock %}
+{% block page_title %}{{ T.goals }}{% endblock %}
+
+{% block content %}
+<div class="list-toolbar" style="display:flex; justify-content:flex-end; margin-bottom:18px;">
+  <button class="btn-accent" data-open-modal="new-goal-modal" type="button">
+    <i data-lucide="plus" style="width:15px;height:15px;"></i> {{ T.add_goal }}
+  </button>
+</div>
+
+{% if goals %}
+<div class="grid grid-3">
+  {% for goal in goals %}
+  <a href="{% url 'goals:detail' goal.pk %}" class="card" style="display:block; text-decoration:none;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+      <div style="font-size:26px;">{{ goal.icon }}</div>
+      {% if goal.is_achieved %}<span class="badge" style="color:var(--success); background:var(--success-soft);">{{ T.achieved }}</span>{% endif %}
+    </div>
+    <div style="font-size:14px; font-weight:600; margin-bottom:6px;">{{ goal.name }}</div>
+    <div class="progress-track" style="margin-bottom:6px;">
+      <div class="progress-fill {% if goal.is_achieved %}success{% endif %}" style="width:{{ goal.progress_pct }}%;"></div>
+    </div>
+    <div class="muted" style="font-size:11.5px; display:flex; justify-content:space-between;">
+      <span>{{ goal.progress_pct }}%</span>
+      <span>{% if goal.deadline %}{{ goal.deadline|date:"M j" }}{% else %}{{ T.no_deadline }}{% endif %}</span>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">
+  <div class="empty-state">
+    <div class="emoji">🎯</div>
+    <h4>{{ T.no_goals_title }}</h4>
+    <p>{{ T.no_goals_body }}</p>
+    <button class="btn-accent" data-open-modal="new-goal-modal" type="button">{{ T.add_goal }}</button>
+  </div>
+</div>
+{% endif %}
+
+<div class="modal-backdrop" id="new-goal-modal" style="display:none;">
+  <div class="modal-box">
+    <h3 class="modal-title">{{ T.add_goal }}</h3>
+    <form method="post">
+      {% csrf_token %}
+      <div class="field-row"><label class="field-label">{{ T.name }}</label>{{ form.name }}</div>
+      <div class="field-row-2">
+        <div><label class="field-label">Icon</label>{{ form.icon }}</div>
+        <div><label class="field-label">{{ T.categories_label }}</label>{{ form.category }}</div>
+      </div>
+      <div class="field-row"><label class="field-label">Description</label>{{ form.description }}</div>
+      <div class="field-row"><label class="field-label">{{ T.deadline }}</label>{{ form.deadline }}</div>
+
+      <div class="field-row">
+        <label class="field-label">{{ T.milestones }}</label>
+        {{ formset.management_form }}
+        {% for mform in formset %}
+          <div style="margin-bottom:8px;">{{ mform.title }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" data-close-modal>{{ T.cancel }}</button>
+        <button type="submit" class="btn-accent">{{ T.add_goal }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
