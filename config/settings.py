@@ -71,23 +71,12 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 # ---------------------------------------------------------------------------
-# Database — MySQL
+# Database — SQLite
 # ---------------------------------------------------------------------------
-# charset MUST be utf8mb4 — the app stores emoji (journal moods, goal icons),
-# and MySQL's plain "utf8" charset is actually a 3-byte-max legacy encoding
-# that cannot hold most emoji. Make sure the database itself was also
-# CREATEd with utf8mb4 (see the SQL in the setup notes).
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": os.environ.get("MYSQL_DB", "planner_db"),
-        "USER": os.environ.get("MYSQL_USER", "planner_user"),
-        "PASSWORD": os.environ.get("MYSQL_PASSWORD", "planner_pass"),
-        "HOST": os.environ.get("MYSQL_HOST", "localhost"),
-        "PORT": os.environ.get("MYSQL_PORT", "3306"),
-        "OPTIONS": {
-            "charset": "utf8mb4",
-        },
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
